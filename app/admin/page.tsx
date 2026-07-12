@@ -41,8 +41,8 @@ export default async function AdminDashboard() {
       {analyses?.map((a) => (
         <div key={a.id} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem' }}>
           <p><strong>Status:</strong> {a.status}</p>
-          <p><strong>By:</strong> {a.posts?.author_name}</p>
-          <p><strong>Excerpt:</strong> {a.posts?.excerpt}</p>
+          <p><strong>By:</strong> {(a.posts as any)?.author_name}</p>
+          <p><strong>Excerpt:</strong> {(a.posts as any)?.excerpt}</p>
           <p><strong>Summary:</strong> {a.summary}</p>
           <p><strong>Commentary:</strong> {a.commentary}</p>
           <p><strong>Difficulty:</strong> {a.difficulty}</p>
@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
             <strong>Audiences:</strong>{' '}
             {a.analysis_audiences?.map((aud: any) => aud.audiences?.name).join(', ')}
           </p>
-          <a href={a.posts?.linkedin_url} target="_blank" rel="noopener noreferrer">
+          <a href={(a.posts as any)?.linkedin_url} target="_blank" rel="noopener noreferrer">
             View original post →
           </a>
 
