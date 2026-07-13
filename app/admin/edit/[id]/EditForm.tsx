@@ -25,6 +25,36 @@ export default function EditForm({
   const [audiences, setAudiences] = useState(initialAudiences)
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const router = useRouter()
+  const [refineTarget, setRefineTarget] = useState<'summary' | 'commentary' | null>(null)
+  const [refineInstruction, setRefineInstruction] = useState('')
+  const [refining, setRefining] = useState(false)
+
+  async function handleRefine() {
+    if (!refineTarget || !refineInstruction.trim()) return
+    setRefining(true)
+
+    const currentText = refineTarget === 'summary' ? summary : commentary
+
+    const res = await fetch('/api/admin/refine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentText, instruction: refineInstruction, fieldLabel: refineTarget }),
+    })
+
+    const data = await res.json()
+    setRefining(false)
+
+    if (!res.ok) {
+      alert(data.error ?? 'Refine failed')
+      return
+    }
+
+    if (refineTarget === 'summary') setSummary(data.revisedText)
+    else setCommentary(data.revisedText)
+
+    setRefineTarget(null)
+    setRefineInstruction('')
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -69,7 +99,30 @@ export default function EditForm({
             style={{ width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8, border: `0.5px solid ${theme.border}`, marginTop: 4, fontFamily: 'sans-serif' }}
           />
         </div>
-
+<div style={{ marginBottom: 14 }}>
+          {refineTarget === 'summary' ? (
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type="text"
+                value={refineInstruction}
+                onChange={(e) => setRefineInstruction(e.target.value)}
+                placeholder="e.g. make this more concise"
+                autoFocus
+                style={{ flex: 1, padding: '6px 8px', fontSize: 12, borderRadius: 6, border: `0.5px solid ${theme.border}` }}
+              />
+              <button type="button" onClick={handleRefine} disabled={refining} style={{ fontSize: 12, padding: '4px 10px', background: theme.blueLight, color: '#fff', border: 'none', borderRadius: 6 }}>
+                {refining ? '…' : 'Go'}
+              </button>
+              <button type="button" onClick={() => setRefineTarget(null)} style={{ fontSize: 12, padding: '4px 10px', background: 'transparent', border: 'none', color: theme.textMuted }}>
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setRefineTarget('summary')} style={{ fontSize: 12, color: theme.blue, background: 'transparent', border: 'none', padding: 0 }}>
+              ✨ Refine with AI
+            </button>
+          )}
+        </div>
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontSize: 12, color: theme.textDark }}>Commentary</label>
           <textarea
@@ -79,7 +132,30 @@ export default function EditForm({
             style={{ width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8, border: `0.5px solid ${theme.border}`, marginTop: 4, fontFamily: 'sans-serif' }}
           />
         </div>
-
+<div style={{ marginBottom: 14 }}>
+          {refineTarget === 'commentary' ? (
+            <div style={{ display: 'flex', gap: 6 }}>
+              <input
+                type="text"
+                value={refineInstruction}
+                onChange={(e) => setRefineInstruction(e.target.value)}
+                placeholder="e.g. make this more technical"
+                autoFocus
+                style={{ flex: 1, padding: '6px 8px', fontSize: 12, borderRadius: 6, border: `0.5px solid ${theme.border}` }}
+              />
+              <button type="button" onClick={handleRefine} disabled={refining} style={{ fontSize: 12, padding: '4px 10px', background: theme.blueLight, color: '#fff', border: 'none', borderRadius: 6 }}>
+                {refining ? '…' : 'Go'}
+              </button>
+              <button type="button" onClick={() => setRefineTarget(null)} style={{ fontSize: 12, padding: '4px 10px', background: 'transparent', border: 'none', color: theme.textMuted }}>
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setRefineTarget('commentary')} style={{ fontSize: 12, color: theme.blue, background: 'transparent', border: 'none', padding: 0 }}>
+              ✨ Refine with AI
+            </button>
+          )}
+        </div>
         <div style={{ marginBottom: 14 }}>
           <label style={{ fontSize: 12, color: theme.textDark }}>Difficulty</label>
           <select
