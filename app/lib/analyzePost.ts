@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
 const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced']
 const VALID_AUDIENCES = ['founders', 'engineers', 'marketers', 'students']
 
-async function findOrCreate(table: 'tags' | 'audiences', name: string): Promise<string> {
+export async function findOrCreate(table: 'tags' | 'audiences', name: string): Promise<string> {
   const existing = await supabaseAdmin.from(table).select('id').eq('name', name).maybeSingle()
   if (existing.data) return existing.data.id
 

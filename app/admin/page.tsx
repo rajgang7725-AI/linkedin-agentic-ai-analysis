@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/app/lib/supabaseAdmin'
 import { createSupabaseServerClient } from '@/app/lib/supabaseServer'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { theme } from '@/app/lib/theme'
 
 async function updateStatus(analysisId: string, newStatus: string) {
   'use server'
@@ -57,8 +58,12 @@ export default async function AdminDashboard() {
           <a href={(a.posts as any)?.linkedin_url} target="_blank" rel="noopener noreferrer">
             View original post →
           </a>
-
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+<div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <a href={`/admin/edit/${a.id}`} style={{ padding: '0.4rem 0.8rem', fontSize: 13, color: theme.blue, textDecoration: 'none', border: `0.5px solid ${theme.blue}`, borderRadius: 6 }}>
+              ✏️ Edit
+            </a>
+          
+          
             <form action={async () => { 'use server'; await updateStatus(a.id, 'published') }}>
               <button type="submit" disabled={a.status === 'published'} style={{ padding: '0.4rem 0.8rem' }}>
                 ✅ Approve & Publish
