@@ -22,6 +22,7 @@ export default function EditForm({
 }: Props) {
   const [imageUrl, setImageUrl] = useState(initialImageUrl ?? '')
   const [generatingSvg, setGeneratingSvg] = useState(false)
+  const [generatingImage, setGeneratingImage] = useState(false)
   const [summary, setSummary] = useState(initialSummary)
   const [commentary, setCommentary] = useState(initialCommentary)
   const [difficulty, setDifficulty] = useState(initialDifficulty)
@@ -71,6 +72,22 @@ async function handleGenerateSvg() {
 
     if (!res.ok) {
       alert(data.error ?? 'SVG generation failed')
+      return
+    }
+    setImageUrl(data.imageUrl)
+  }
+  async function handleGenerateImage() {
+    setGeneratingImage(true)
+    const res = await fetch('/api/admin/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ analysisId: id, topic, summary }),
+    })
+    const data = await res.json()
+    setGeneratingImage(false)
+
+    if (!res.ok) {
+      alert(data.error ?? 'Image generation failed')
       return
     }
     setImageUrl(data.imageUrl)
@@ -212,9 +229,13 @@ async function handleGenerateSvg() {
           {imageUrl && (
             <img src={imageUrl} alt="Analysis illustration" style={{ maxWidth: '100%', borderRadius: 8, marginTop: 6, marginBottom: 8, border: `0.5px solid ${theme.border}` }} />
           )}
-          <div>
+          
+          <div style={{ display: 'flex', gap: 8 }}>
             <button type="button" onClick={handleGenerateSvg} disabled={generatingSvg} style={{ fontSize: 12, padding: '6px 12px', background: theme.bgTint, color: theme.blue, border: 'none', borderRadius: 6 }}>
               {generatingSvg ? 'Generating…' : '🎨 Generate diagram (SVG)'}
+            </button>
+            <button type="button" onClick={handleGenerateImage} disabled={generatingImage} style={{ fontSize: 12, padding: '6px 12px', background: theme.bgTint, color: theme.blue, border: 'none', borderRadius: 6 }}>
+              {generatingImage ? 'Generating…' : '🖼️ Generate image (AI)'}
             </button>
           </div>
         </div>
