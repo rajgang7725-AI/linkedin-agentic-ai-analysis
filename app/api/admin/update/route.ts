@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { id, summary, commentary, difficulty, tags, audiences } = await request.json()
+  const { id, summary, commentary, difficulty, tags, audiences, imageUrl } = await request.json()
 
   if (!id) {
     return NextResponse.json({ error: 'Missing id' }, { status: 400 })
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
   const { error: updateError } = await supabaseAdmin
     .from('analyses')
-    .update({ summary, commentary, difficulty, updated_at: new Date().toISOString() })
+    .update({ summary, commentary, difficulty, image_url: imageUrl, updated_at: new Date().toISOString() })
     .eq('id', id)
 
   if (updateError) {

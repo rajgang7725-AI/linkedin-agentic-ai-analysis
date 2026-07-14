@@ -13,7 +13,7 @@ export default async function AnalysisPage({
   const { data: a, error } = await supabase
     .from('analyses')
     .select(`
-      id, summary, commentary, difficulty,
+      id, summary, commentary, difficulty, image_url,
       posts ( linkedin_url, author_name, excerpt ),
       analysis_tags ( tags ( name ) ),
       analysis_audiences ( audiences ( name ) )
@@ -60,7 +60,9 @@ export default async function AnalysisPage({
           </span>
         ))}
       </div>
-
+{a.image_url && (
+        <img src={a.image_url} alt="Illustration for this analysis" style={{ width: '100%', borderRadius: 12, marginBottom: 20 }} />
+      )}
       <div style={{ background: theme.bgPage, borderRadius: 12, padding: 16, marginBottom: 20 }}>
         <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>Original post excerpt</div>
         <div style={{ fontSize: 14, color: theme.textDark, fontStyle: 'italic' }}>"{post?.excerpt}"</div>

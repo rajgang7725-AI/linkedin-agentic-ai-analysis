@@ -13,11 +13,15 @@ type Props = {
   initialAudiences: string
   postExcerpt: string
   authorName: string
+  initialImageUrl: string | null
+  topic: string
 }
 
 export default function EditForm({
-  id, initialSummary, initialCommentary, initialDifficulty, initialTags, initialAudiences, postExcerpt, authorName,
+  id, initialSummary, initialCommentary, initialDifficulty, initialTags, initialAudiences, postExcerpt, authorName, initialImageUrl, topic,
 }: Props) {
+  const [imageUrl, setImageUrl] = useState(initialImageUrl ?? '')
+  const [generatingSvg, setGeneratingSvg] = useState(false)
   const [summary, setSummary] = useState(initialSummary)
   const [commentary, setCommentary] = useState(initialCommentary)
   const [difficulty, setDifficulty] = useState(initialDifficulty)
@@ -55,7 +59,22 @@ export default function EditForm({
     setRefineTarget(null)
     setRefineInstruction('')
   }
+async function handleGenerateSvg() {
+    setGeneratingSvg(true)
+    const res = await fetch('/api/admin/generate-svg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ analysisId: id, topic, summary }),
+    })
+    const data = await res.json()
+    setGeneratingSvg(false)
 
+    if (!res.ok) {
+      alert(data.error ?? 'SVG generation failed')
+      return
+    }
+    setImageUrl(data.imageUrl)
+  }
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setStatus('saving')
@@ -64,7 +83,7 @@ export default function EditForm({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id, summary, commentary, difficulty,
+        id, summary, commentary, difficulty, imageUrl,
         tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
         audiences: audiences.split(',').map((a) => a.trim()).filter(Boolean),
       }),
@@ -188,7 +207,17 @@ export default function EditForm({
             style={{ width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8, border: `0.5px solid ${theme.border}`, marginTop: 4 }}
           />
         </div>
-
+<div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: 12, color: theme.textDark }}>Image</label>
+          {imageUrl && (
+            <img src={imageUrl} alt="Analysis illustration" style={{ maxWidth: '100%', borderRadius: 8, marginTop: 6, marginBottom: 8, border: `0.5px solid ${theme.border}` }} />
+          )}
+          <div>
+            <button type="button" onClick={handleGenerateSvg} disabled={generatingSvg} style={{ fontSize: 12, padding: '6px 12px', background: theme.bgTint, color: theme.blue, border: 'none', borderRadius: 6 }}>
+              {generatingSvg ? 'Generating…' : '🎨 Generate diagram (SVG)'}
+            </button>
+          </div>
+        </div>
         {status === 'error' && <p style={{ color: 'red', fontSize: 13, marginBottom: 12 }}>Save failed — try again.</p>}
 
         <div style={{ display: 'flex', gap: 8 }}>

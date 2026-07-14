@@ -13,7 +13,7 @@ export default async function EditPage({
     .from('analyses')
     .select(`
       id, summary, commentary, difficulty, image_url,
-      posts ( author_name, excerpt, linkedin_url ),
+      posts ( author_name, excerpt, linkedin_url, topic_searched ),
       analysis_tags ( tags ( name ) ),
       analysis_audiences ( audiences ( name ) )
     `)
@@ -35,6 +35,8 @@ export default async function EditPage({
       initialAudiences={initialAudiences.join(', ')}
       postExcerpt={(analysis.posts as any)?.excerpt ?? ''}
       authorName={(analysis.posts as any)?.author_name ?? ''}
+      initialImageUrl={analysis.image_url}
+      topic={(analysis.posts as any)?.topic_searched ?? ''}
     />
   )
 }
